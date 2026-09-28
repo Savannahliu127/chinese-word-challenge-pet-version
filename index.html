@@ -3,14 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🐾 900 詞語認讀：奇幻寵物養成大師</title>
+  <title>🐾 900 詞語認讀：奇幻寵物養成大師 (iPad 9 極速響應版)</title>
   <!-- 💡 拼音庫 + 🎉 煙花粒子動畫庫 -->
   <script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.19.6/dist/index.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <style>
     * { box-sizing: border-box; font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; }
     
-    /* 🌸 柔和夢幻養成背景 (預設櫻花森林) */
     body {
       background: radial-gradient(circle at center, #2e1065 0%, #0f172a 100%);
       min-height: 100vh;
@@ -40,7 +39,6 @@
       transition: all 0.3s ease;
     }
 
-    /* 🐱 頂部萌寵小耳朵裝飾 */
     .card-container::before {
       content: '🐾';
       position: absolute;
@@ -149,7 +147,6 @@
       box-shadow: 0 0 12px rgba(250, 204, 21, 0.6);
     }
 
-    /* 🐾 寵物狀態經驗條 */
     .pet-stage {
       background: rgba(0, 0, 0, 0.35);
       border-radius: 18px;
@@ -178,7 +175,6 @@
       transition: width 0.3s ease;
     }
 
-    /* 🐾 卡片與寵物顯示 */
     .flashcard {
       background: rgba(15, 23, 42, 0.75);
       border: 3px solid #f472b6;
@@ -287,7 +283,6 @@
     .btn-danger { background: linear-gradient(135deg, #f43f5e, #be123c); box-shadow: 0 0 20px rgba(244, 63, 94, 0.5); }
     .btn-secondary { background: rgba(255, 255, 255, 0.2); color: #fff; box-shadow: none; font-size: 15px; padding: 8px 18px; }
 
-    /* iPad 橫屏自適應 */
     @media (orientation: landscape) and (min-width: 768px) {
       body { padding: 10px; }
       .card-container { max-width: 820px; padding: 32px 36px; }
@@ -372,7 +367,6 @@
       <div class="bgm-btn" id="bgm-btn" onclick="toggleBGM()">🔇 BGM: OFF</div>
     </div>
 
-    <!-- 🐾 寵物成長經驗條 -->
     <div class="pet-stage">
       <div class="pet-name" id="pet-name">🥚 神秘寵物蛋 (1/5 破殼)</div>
       <div class="pet-exp-bar">
@@ -395,14 +389,12 @@
     <br>
     <button class="btn btn-secondary" id="skip-btn" onclick="skipWord()" style="display:none; margin-top:10px;">跳過此詞</button>
 
-    <!-- 結算報告 -->
     <div class="result-box" id="result-box" style="display:none; margin-top:20px;">
       <div id="result-title" style="font-size:24px; font-weight:bold; color:#f472b6; margin-bottom:10px;">🎯 萌寵養成成果日誌</div>
       <div id="result-info" style="font-size:17px; color:#cbd5e0; line-height:1.6;"></div>
     </div>
   </div>
 
-  <!-- 讀錯提示 Modal -->
   <div class="modal-overlay" id="fail-modal">
     <div class="modal-content">
       <div style="font-size: 22px; font-weight: bold; color: #f472b6; margin-bottom: 10px;">🥺 小寵物歪頭困惑</div>
@@ -416,14 +408,13 @@
       
       <div style="display: flex; flex-direction: column; gap: 8px;">
         <button class="btn btn-success" onclick="choiceContinue()">✨ 再教一次 (重試此詞)</button>
-        <button class="btn btn-warning" onclick="choiceRestart()">🔄 重新開始 (選擇模式)</button>
+        <button class="btn btn-warning" onclick="choiceRestart()">🔄 重新開始 (從頭開始)</button>
         <button class="btn btn-danger" onclick="choiceEnd()">🏁 回家休息 (查看成果)</button>
       </div>
     </div>
   </div>
 
   <script>
-    // 💡 多音字特例精準校正字典
     const customPinyinDict = {
       "聽音樂": "tīng yīn yuè", "聽音乐": "tīng yīn yuè",
       "音樂": "yīn yuè", "音乐": "yīn yuè",
@@ -438,7 +429,6 @@
       "快樂": ["kuai", "le"], "快乐": ["kuai", "le"]
     };
 
-    // 🌸 5大家園地圖主題配置 (每 30 詞變換一次)
     const stageThemes = [
       { name: "🌸 馬卡龍櫻花森林", bg: "radial-gradient(circle at center, #831843 0%, #0f172a 100%)", themeColor: "#f472b6" },
       { name: "☁️ 雲朵天空城堡", bg: "radial-gradient(circle at center, #0c4a6e 0%, #0f172a 100%)", themeColor: "#38bdf8" },
@@ -447,7 +437,6 @@
       { name: "🍬 夢幻糖果王國", bg: "radial-gradient(circle at center, #581c87 0%, #0f172a 100%)", themeColor: "#c084fc" }
     ];
 
-    // 🐾 奇幻寵物庫序列（每一隻經歷 30 詞進化週期）
     const petLibrary = [
       { name: "噴火小龍", egg: "🥚", baby: "🐣", growth: "🐲", ultimate: "🐉 👑 烈焰金龍王", themeIdx: 0 },
       { name: "星空貓咪", egg: "🥚", baby: "🐱", growth: "😸", ultimate: "🦄 👑 璀璨星空獨角獸", themeIdx: 1 },
@@ -463,8 +452,8 @@
 
     const rawWordList = [
       "晴天", "雨天", "陰天", "大霧", "下雨", "打雷", "晴朗", "冰雹", "太陽", "下雪", "月亮", "星星", "彩虹", "閃電", "颱風", 
-      "涼快的", "寒冷的", "雲霧", "霧霾", "刮風", "潮濕的", "炎熱的", "傾盆大雨", "烏雲密佈", "陽光明媚", "今天", "昨天", 
-      "新聞", "時候", "前天", "後天", "星期", "分", "秒", "小息", "每天", "天天", "黃昏", "早上", "中午", "下午", "晚上", 
+      "涼快的", "寒冷的", "雲霧", "霧霾", "刮風", "潮濕的", "炎熱的", "傾盆大雨", "烏雲密佈", "陽光明媚", "今天", "新聞", 
+      "昨天", "時候", "前天", "後天", "星期", "分", "秒", "小息", "每天", "天天", "黃昏", "早上", "中午", "下午", "晚上", 
       "上午", "以前", "從前", "以後", "現在", "去年", "今年", "前年", "週末", "上課", "下課", "很久", "季節", "小時", "一大早", 
       "春夏秋冬", "日月", "年月", "有", "有一天", "有一次", "有時候", "星期天", "過了一會兒", "很久以前", "上週", "下個月", 
       "新年", "春節", "假期", "暑假", "假日", "國慶", "放假的時候", "聖誕節", "復活節", "清明節", "萬聖節", "中秋節", 
@@ -597,85 +586,6 @@
       return arr;
     }
 
-    // 🐾 獲取寵物進化狀態 (每 30 詞經歷一個完整進化週期)
-    function getPetState(index) {
-      const petIdx = Math.floor(index / 30) % petLibrary.length;
-      const pet = petLibrary[petIdx];
-      const stepInPet = (index % 30) + 1; // 1 ~ 30
-
-      let stageName = "";
-      let avatar = "";
-      let isUltimate = (stepInPet === 30);
-
-      if (stepInPet <= 5) {
-        stageName = `${pet.egg} 神秘寵物蛋 (${stepInPet}/5 破殼)`;
-        avatar = pet.egg;
-      } else if (stepInPet <= 15) {
-        stageName = `🐣 幼年體：小${pet.name} (${stepInPet}/15 成長)`;
-        avatar = pet.baby;
-      } else if (stepInPet < 30) {
-        stageName = `✨ 成長體：大${pet.name} (${stepInPet}/30 終極進化)`;
-        avatar = pet.growth;
-      } else {
-        stageName = `👑 終極神獸：${pet.ultimate}`;
-        avatar = pet.ultimate.split(' ')[0];
-      }
-
-      return {
-        petName: pet.name,
-        stageName: stageName,
-        avatar: avatar,
-        themeIdx: pet.themeIdx,
-        isUltimate: isUltimate,
-        stepInPet: stepInPet
-      };
-    }
-
-    function playSuccessChime(isUltimate, isCrit) {
-      try {
-        const ctx = audioContext || new (window.AudioContext || window.webkitAudioContext)();
-        const notes = isUltimate ? [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98] : (isCrit ? [523.25, 659.25, 783.99, 1046.50, 1318.51] : [523.25, 659.25, 783.99, 1046.50]);
-        notes.forEach((freq, i) => {
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = (isUltimate || isCrit) ? 'triangle' : 'sine';
-          osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.05);
-          gain.gain.setValueAtTime(0.3, ctx.currentTime + i * 0.05);
-          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.05 + 0.3);
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          osc.start(ctx.currentTime + i * 0.05);
-          osc.stop(ctx.currentTime + i * 0.05 + 0.3);
-        });
-      } catch(e) {}
-    }
-
-    function playFailBuzz() {
-      try {
-        const ctx = audioContext || new (window.AudioContext || window.webkitAudioContext)();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(180, ctx.currentTime);
-        gain.gain.setValueAtTime(0.2, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(ctx.currentTime);
-        osc.stop(ctx.currentTime + 0.3);
-      } catch(e) {}
-    }
-
-    function triggerConfetti(isUltimate, isCrit) {
-      if (window.confetti) {
-        confetti({
-          particleCount: isUltimate ? 120 : (isCrit ? 80 : 35),
-          spread: isUltimate ? 120 : (isCrit ? 90 : 50),
-          origin: { y: 0.65 }
-        });
-      }
-    }
-
     function loadHighScore() {
       const savedScore = localStorage.getItem('vocab_challenge_max') || 0;
       document.getElementById('high-score-display').innerText = `🏆 最高：${savedScore}`;
@@ -708,7 +618,7 @@
 
       const petState = getPetState(currentIndex);
 
-      // 切換主題小屋背景
+      // 切換主題家園背景
       const stageTheme = stageThemes[petState.themeIdx];
       document.body.style.background = stageTheme.bg;
       document.getElementById('main-card').style.borderColor = stageTheme.themeColor;
@@ -812,14 +722,15 @@
       checkSavedProgressBtn();
     }
 
+    // ⚡ 核心：實時串流語音辨識 (interimResults = true，極速攔截不等待靜音)
     function initSpeechRecognition() {
       if (!isChallenging) return;
 
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       recognition = new SpeechRecognition();
       recognition.lang = 'zh-CN';
-      recognition.continuous = false;
-      recognition.interimResults = false;
+      recognition.continuous = true;
+      recognition.interimResults = true; // ⚡ 開啟中間實時結果，解決 iPad 9 響應慢
 
       const targetWord = activeWordList[currentIndex].replace(/[…\.]/g, '');
       const petState = getPetState(currentIndex);
@@ -832,13 +743,16 @@
 
       recognition.onresult = (event) => {
         if (!isChallenging) return;
-        const heardText = event.results[0][0].transcript.trim();
-        console.log(`聽到的語音：[${heardText}]，目標詞語：[${targetWord}]`);
 
-        if (checkMatch(heardText, targetWord)) {
-          handleSuccess();
-        } else {
-          handleFailPrompt(targetWord, heardText);
+        // 遍歷所有實時中間結果，只要匹配立刻觸發，不用死等 Siri 判定說話結束
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const heardText = event.results[i][0].transcript.trim();
+          console.log(`實時聽到的語音：[${heardText}]，目標詞語：[${targetWord}]`);
+
+          if (checkMatch(heardText, targetWord)) {
+            handleSuccess();
+            return;
+          }
         }
       };
 
@@ -908,7 +822,7 @@
       return py;
     }
 
-    // 💡 逐字音節嚴格匹配引擎（排除難過/難得、綠色/黃色等誤判）
+    // 💡 逐字音節嚴格匹配引擎 (排除「難過/難得」、「綠色/黃色」等誤判)
     function checkMatch(heard, target) {
       if (!heard || !target) return false;
       
