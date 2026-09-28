@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🐾 900 詞語認讀：奇幻寵物養成大師 (iPad 9 極速響應版)</title>
+  <title>🐾 900 詞語認讀：奇幻寵物養成大師</title>
   <!-- 💡 拼音庫 + 🎉 煙花粒子動畫庫 -->
   <script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.19.6/dist/index.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -24,7 +24,6 @@
       transition: background 0.8s ease;
     }
 
-    /* 🐾 溫馨萌寵玻璃卡片容器 */
     .card-container {
       background: rgba(255, 255, 255, 0.12);
       border: 3px solid #f472b6;
@@ -377,13 +376,13 @@
     <div class="flashcard" id="flashcard">
       <div id="crit-box"></div>
       <div class="pet-avatar" id="pet-avatar">🥚</div>
-      <div class="word" id="word-display">點擊開始餵養</div>
+      <div class="word" id="word-display">點擊下方開始</div>
     </div>
 
     <div class="status-text" id="status-text">點擊按鈕念出詞語餵養小寵物</div>
 
     <div class="btn-group">
-      <button class="btn" id="start-btn" onclick="startNewGame()">🐾 開始餵養寵物</button>
+      <button class="btn" id="start-btn" onclick="handleClickStart()">🐾 開始餵養寵物</button>
       <button class="btn btn-warning" id="resume-btn" onclick="loadSavedProgress()" style="display:none;">📂 繼續上次進度</button>
     </div>
     <br>
@@ -610,6 +609,85 @@
       localStorage.setItem('vocab_saved_list', JSON.stringify(activeWordList));
     }
 
+    function getPetState(index) {
+      const petIdx = Math.floor(index / 30) % petLibrary.length;
+      const pet = petLibrary[petIdx];
+      const stepInPet = (index % 30) + 1;
+
+      let stageName = "";
+      let avatar = "";
+      let isUltimate = (stepInPet === 30);
+
+      if (stepInPet <= 5) {
+        stageName = `${pet.egg} 神秘寵物蛋 (${stepInPet}/5 破殼)`;
+        avatar = pet.egg;
+      } else if (stepInPet <= 15) {
+        stageName = `🐣 幼年體：小${pet.name} (${stepInPet}/15 成長)`;
+        avatar = pet.baby;
+      } else if (stepInPet < 30) {
+        stageName = `✨ 成長體：大${pet.name} (${stepInPet}/30 終極進化)`;
+        avatar = pet.growth;
+      } else {
+        stageName = `👑 終極神獸：${pet.ultimate}`;
+        avatar = pet.ultimate.split(' ')[0];
+      }
+
+      return {
+        petName: pet.name,
+        stageName: stageName,
+        avatar: avatar,
+        themeIdx: pet.themeIdx,
+        isUltimate: isUltimate,
+        stepInPet: stepInPet
+      };
+    }
+
+    function playSuccessChime(isUltimate, isCrit) {
+      try {
+        const ctx = audioContext || new (window.AudioContext || window.webkitAudioContext)();
+        const notes = isUltimate ? [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98] : (isCrit ? [523.25, 659.25, 783.99, 1046.50, 1318.51] : [523.25, 659.25, 783.99, 1046.50]);
+        notes.forEach((freq, i) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = (isUltimate || isCrit) ? 'triangle' : 'sine';
+          osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.05);
+          gain.gain.setValueAtTime(0.3, ctx.currentTime + i * 0.05);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.05 + 0.3);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(ctx.currentTime + i * 0.05);
+          osc.stop(ctx.currentTime + i * 0.05 + 0.3);
+        });
+      } catch(e) {}
+    }
+
+    function playFailBuzz() {
+      try {
+        const ctx = audioContext || new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(180, ctx.currentTime);
+        gain.gain.setValueAtTime(0.2, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.3);
+      } catch(e) {}
+    }
+
+    function triggerConfetti(isUltimate, isCrit) {
+      if (window.confetti) {
+        confetti({
+          particleCount: isUltimate ? 120 : (isCrit ? 80 : 35),
+          spread: isUltimate ? 120 : (isCrit ? 90 : 50),
+          origin: { y: 0.65 }
+        });
+      }
+    }
+
+    // ⚡ 卡片優先更新，100% 確保字詞即時出現在螢幕正中間
     function updateCard() {
       if (currentIndex >= activeWordList.length) {
         endChallenge(true);
@@ -618,7 +696,6 @@
 
       const petState = getPetState(currentIndex);
 
-      // 切換主題家園背景
       const stageTheme = stageThemes[petState.themeIdx];
       document.body.style.background = stageTheme.bg;
       document.getElementById('main-card').style.borderColor = stageTheme.themeColor;
@@ -646,6 +723,7 @@
       document.getElementById('count-display').innerText = `🍎 餵養果實：${currentIndex} 個`;
       document.getElementById('combo-display').innerText = `❤️ COMBO x${comboCount}`;
       
+      // 💡 關鍵：立即替換畫面中央的字詞
       document.getElementById('word-display').innerText = activeWordList[currentIndex];
       saveProgress();
     }
@@ -660,6 +738,8 @@
       comboCount = 0;
       maxCombo = 0;
       sessionWrongWords.clear();
+
+      updateCard(); // 優先刷新字詞
       startChallengeProcess();
     }
 
@@ -670,8 +750,17 @@
 
       const savedList = localStorage.getItem('vocab_saved_list');
       if (savedList) {
-        try { activeWordList = JSON.parse(savedList); } catch(e) { activeWordList = [...rawWordList]; }
+        try {
+          const parsed = JSON.parse(savedList);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            activeWordList = parsed;
+          } else {
+            activeWordList = [...rawWordList];
+          }
+        } catch(e) { activeWordList = [...rawWordList]; }
       }
+
+      updateCard(); // 優先刷新字詞
       startChallengeProcess();
     }
 
@@ -702,7 +791,6 @@
       document.getElementById('resume-btn').style.display = 'none';
       document.getElementById('skip-btn').style.display = 'inline-block';
       
-      updateCard();
       initSpeechRecognition();
     }
 
@@ -722,7 +810,6 @@
       checkSavedProgressBtn();
     }
 
-    // ⚡ 核心：實時串流語音辨識 (interimResults = true，極速攔截不等待靜音)
     function initSpeechRecognition() {
       if (!isChallenging) return;
 
@@ -730,7 +817,7 @@
       recognition = new SpeechRecognition();
       recognition.lang = 'zh-CN';
       recognition.continuous = true;
-      recognition.interimResults = true; // ⚡ 開啟中間實時結果，解決 iPad 9 響應慢
+      recognition.interimResults = true; // 實時串流攔截
 
       const targetWord = activeWordList[currentIndex].replace(/[…\.]/g, '');
       const petState = getPetState(currentIndex);
@@ -744,7 +831,6 @@
       recognition.onresult = (event) => {
         if (!isChallenging) return;
 
-        // 遍歷所有實時中間結果，只要匹配立刻觸發，不用死等 Siri 判定說話結束
         for (let i = event.resultIndex; i < event.results.length; ++i) {
           const heardText = event.results[i][0].transcript.trim();
           console.log(`實時聽到的語音：[${heardText}]，目標詞語：[${targetWord}]`);
@@ -822,7 +908,6 @@
       return py;
     }
 
-    // 💡 逐字音節嚴格匹配引擎 (排除「難過/難得」、「綠色/黃色」等誤判)
     function checkMatch(heard, target) {
       if (!heard || !target) return false;
       
@@ -1001,9 +1086,18 @@
     }
 
     loadHighScore();
+    
+    // 安全載入存檔（防止數據損壞導致字詞無法顯示）
     const savedListStr = localStorage.getItem('vocab_saved_list');
     if (savedListStr) {
-      try { activeWordList = JSON.parse(savedListStr); } catch(e) {}
+      try {
+        const parsed = JSON.parse(savedListStr);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          activeWordList = parsed;
+        } else {
+          activeWordList = [...rawWordList];
+        }
+      } catch(e) { activeWordList = [...rawWordList]; }
     }
     currentMode = localStorage.getItem('vocab_saved_mode') || 'sequential';
     selectMode(currentMode);
